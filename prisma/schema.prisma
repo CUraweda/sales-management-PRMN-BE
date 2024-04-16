@@ -1,0 +1,279 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(cuid())
+  name       String
+  email      String    @unique
+  jabatan    String?
+  phone      String?
+  password   String
+  role_id    String
+  is_deleted Boolean?
+  role       Role      @relation(fields: [role_id], references: [id])
+  order      Order[]
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+}
+
+model Role {
+  id          String @id @default(cuid())
+  role        String
+  number_role Int
+  user        User[]
+}
+
+model Custs {
+  id               String    @id @default(cuid())
+  name             String
+  type             String
+  contact          String?
+  contact_phone    String?
+  email            String?
+  npwp             String?
+  address          String?
+  fincontact       String?
+  fincontact_phone String?
+  img_logo         String?
+  img_akta         String?
+  img_nib          String?
+  img_npwp         String?
+  is_deleted       Boolean?
+  createdAt        DateTime? @default(now())
+  updatedAt        DateTime? @updatedAt
+  order            Order[]
+}
+
+model Order {
+  id              String             @id @default(cuid())
+  id_cust         String
+  id_user         String
+  Sales_type      String?
+  camp_name       String?
+  order_no        Int?
+  order_date      DateTime? 
+  period_start    DateTime?
+  period_end      DateTime?
+  pay_type        String?
+  no_mo           String?
+  media_tayang    String?
+  rate_type       String?
+  sales_approve   Boolean?
+  manager_approve Boolean?
+  pic_approve     Boolean?
+  request_by      String?
+  created_At      DateTime?          @default(now())
+  updated_At      DateTime?          @updatedAt
+  costumer        Custs              @relation(fields: [id_cust], references: [id])
+  user            User               @relation(fields: [id_user], references: [id])
+  OrderMitra      OrderMitra[]
+  payCash         payCash[]
+  barter          payBarter[]
+  semiBarter      paySemiBarter[]
+  kredit          payKredit[]
+  termin          payTermin[]
+  deposit         payDeposit[]
+  oti             OrderTayangIklan[]
+  listProduk      listProduk[]
+}
+
+model Mitra {
+  id         String       @id @default(cuid())
+  name       String
+  status     Boolean?
+  OrderMitra OrderMitra[]
+  is_deleted Boolean?
+  created_At DateTime?    @default(now())
+  updated_At DateTime?    @updatedAt
+}
+
+model OrderMitra {
+  idOrder String
+  idMitra String
+  order   Order? @relation(fields: [idOrder], references: [id])
+  mitra   Mitra? @relation(fields: [idMitra], references: [id])
+
+  @@id([idMitra, idOrder])
+}
+
+model listProduk {
+  id       String  @id @default(cuid())
+  idOrder  String?
+  produk   String?
+  rate     String?
+  kategori String?
+  order    Order?  @relation(fields: [idOrder], references: [id])
+}
+
+model payCash {
+  idOrder    String
+  order      Order?   @relation(fields: [idOrder], references: [id])
+  total      Int
+  tempo      DateTime
+  diskon     Float?
+  cash_back  Float?
+  intensive  Float?
+  finalPrice Int?
+
+  @@id([idOrder])
+}
+
+model payBarter {
+  idOrder    String
+  order      Order?    @relation(fields: [idOrder], references: [id])
+  nilai      Int
+  barang     String?
+  tempo      DateTime?
+  diskon     Float?
+  cash_back  Float?
+  intensive  Float?
+  finalPrice Int?
+
+  @@id([idOrder])
+}
+
+model paySemiBarter {
+  idOrder     String
+  order       Order?   @relation(fields: [idOrder], references: [id])
+  nilaiBarter Int
+  tempoBarter DateTime
+  nilaiCash   Int
+  tempoCash   DateTime
+  itemBarang  String
+  totalRate   Int
+  finalPrice  Int
+  diskon      Float?
+  cash_back   Float?
+  intensive   Float?
+
+  @@id([idOrder])
+}
+
+model payKredit {
+  idOrder     String
+  order       Order?   @relation(fields: [idOrder], references: [id])
+  nilaiKredit Int
+  tempo       DateTime
+  diskon      Float?
+  finalPrice  Int
+  cash_back   Float?
+  intensive   Float?
+
+  @@id([idOrder])
+}
+
+model payTermin {
+  idOrder    String
+  order      Order?   @relation(fields: [idOrder], references: [id])
+  termin_1   Int
+  tempo_1    DateTime
+  termin_2   Int
+  tempo_2    DateTime
+  termin_3   Int
+  tempo_3    DateTime
+  diskon     Float?
+  finalPrice Int
+  cash_back  Float?
+  intensive  Float?
+
+  @@id([idOrder])
+}
+
+model payDeposit {
+  idOrder      String
+  order        Order? @relation(fields: [idOrder], references: [id])
+  totalDeposit Int
+  minDeposit   Int
+  status       String
+  cash_back    Float?
+  intensive    Float?
+
+  @@id([idOrder])
+}
+
+model OrderTayangIklan {
+  id           String    @id @default(cuid())
+  idOrder      String
+  product      String?
+  sub          String?
+  oti          String?
+  tayang       Boolean?
+  bukti_tayang String?
+  orderDate    DateTime?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+  order        Order?    @relation(fields: [idOrder], references: [id])
+}
+
+model rate_article {
+  id                    String    @id @default(cuid())
+  name                  String
+  prmn                  Int?
+  mitra                 Int?
+  is_custom_price_prmn  Boolean?
+  is_custom_price_mitra Boolean?
+  note                  String?
+  is_deleted            Boolean?
+  createdAt             DateTime? @default(now())
+  updatedAt             DateTime? @updatedAt
+}
+
+model rate_sosmed {
+  id              String    @id @default(cuid())
+  name            String
+  instagram       Int?
+  facebook        Int?
+  rate            Int?
+  type            String?
+  note            String?
+  is_other        Boolean?
+  is_custom_price Boolean?
+  is_deleted      Boolean?
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+}
+
+model rate_other_content {
+  id              String    @id @default(cuid())
+  name            String
+  rate            Int?
+  note            String?
+  is_custom_price Boolean?
+  is_deleted      Boolean?
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+}
+
+model rate_cpd {
+  id           String    @id @default(cuid())
+  name         String
+  type         String?
+  size         String?
+  rate_home    Int?
+  rate_detail  Int?
+  rate_section Int?
+  is_deleted   Boolean?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+}
+
+model rate_cpm {
+  id              String    @id @default(cuid())
+  name            String
+  type            String?
+  size            String?
+  rate            Int?
+  is_deleted      Boolean?
+  is_custom_price Boolean?
+  createdAt       DateTime? @default(now())
+  updatedAt       DateTime? @updatedAt
+}
